@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>3D Flex</title>
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="dist/reveal.css">
+		<link rel="stylesheet" href="dist/posert-theme/posert.css" id="theme">
+		<link rel="stylesheet" href="dist/posert-theme/presentation.css">
+	</head>
+  <body>
+<div class="reveal">
+<div class="slides">
+
+<section>
+    <h1>3D Flex</h1>
+</section>
+
+<section data-auto-animate>
+    <h2>Overview</h2>
+    <h2 class="fake-p">Math</h2>
+    <p class="fragment">Math</p>
+    <p class="fragment">Math</p>
+</section>
+
+<section data-auto-animate>
+    <h2>Math</h2>
+    <div class="fit-one r-stretch">
+        <img src="figures/math-overview.jpg" alt="" class="bordered">
+    </div>
+</section>
+
+<section data-auto-animate="">
+    <h2>Canonical 3D Map</h2>
+    <span class="bigmath">
+        \[\begin{aligned}
+        V
+        \end{aligned}\]
+    </span>
+
+    <p>
+        This is just your normal volume: your particles are aligned and backprojected
+        to give you a map.
+    </p>
+</section>
+
+<section data-auto-animate="">
+    <h2>Alignment</h2>
+
+    <p>
+        For each particle \(i\), find some set of angles (3 values) and translations (2 values)
+        to maximize the "fit" of the particle to the current volume.
+    </p>
+    <p class="fragment">
+        Since each particle has its own pose, this is typically represented as 
+        <span class="bigmath">
+            \[
+            \begin{aligned}
+            \phi_i \in \mathbf{R}^5
+            \end{aligned}
+            \]
+        </span>
+    </p>
+</section>
+
+<section data-auto-animate=""
+data-background-image="figures/projections.png">
+
+<div class="r-stretch"></div>
+<div style="color: white; font-size: 36pt;">
+    <p>\(\phi\)<sub style="color: #AAAAFF; font-weight: bold;">Left</sub>: (0&deg;, 0&deg;, 10&deg;, 2px, 0px)</p>
+    <p>\(\phi\)<sub style="color: #FFCCAA; font-weight: bold;">Right</sub>: (0&deg;, 0&deg;, 80&deg;, 7px, 0px)</p>
+</div>
+
+</section>
+
+<section data-auto-animate="">
+    <h2>So remember</h2>
+
+    <p class="bigmath">\[\phi_i\]</p>
+    <p>means: "The angles and shifts necessary to get volume \(V\) to produce the \(i\)<sup>th</sup> image."</p>
+</section>
+
+<section
+data-background-image="figures/phi-to-i.png">
+
+<p class="fragment" style="background-color: #FFFFFFCC; font-size: 32pt;">Let's make up some mathematical notation!</p>
+</section>
+
+<section data-auto-animate="">
+    <p>When we want to <span class="emph">project something</span> along some set of angles \(\phi\), we'll note that as</p>
+    <p class="bigmath">\[P(\phi_i)\]</p>
+    <div class="overlay read-text fragment fade-in-then-out">
+        <p>
+            For instance, \(P((0,0,0,0,0))\) represents "Add up all the values along the Z axis for
+            each (X,Y) position without rotating or shifting the volume at all."
+        </p>
+        <p>
+            You could apply this "operator" to any volume!
+        </p>
+    </div>
+
+    <div class="fragment">
+        <p>So, to note projecting some volume \(V\) along those angles, we'd write</p>
+        <p class="bigmath">\[P(\phi_i)V\]</p>
+    </div>
+</section>
+
+<section>
+    <p>Turn a cone \(V\) into an image of a circle: \(P(topdown)V\)</p>
+    <p>Turn a cone \(V\) into a triangle: \(P(side view)V\)</p>
+</section>
+
+<section>
+    <div class="read-text">
+        <p>We also know that our images are "corrupted" by the CTF. We can add that as another operator, \(C_i\)</p>
+        <p class="fragment">We also know the images are noisy. We can represent this with another operator \(\eta\)</p>
+    </div>
+
+    <div class="fragment">
+        <p>So now, to model how we get an image \(I\) from a volume \(V\):</p>
+        <p class="bigmath">
+        \[
+            I_i = C_iP(\phi_i)V + \eta
+        \]
+        </p>
+    </div>
+
+    <div class="fragment read-text">
+        <p>
+            At this point, you've built the classic cryoEM algorithms! Finding the angles \(\phi\) is what we spend
+            most of our time doing.
+        </p>
+    </div>
+</section>
+
+<section data-auto-animate="">
+    <h2>So what makes 3D Flex...flex?</h2>
+    <p>Or, Latent Spaces</p>
+</section>
+
+<section data-auto-animate="">
+    <h2>Latent spaces</h2>
+    <p>Imagine you want to classify handwritten 0's and 9's into two bins.</p>
+</section>
+
+<section
+data-background-image="figures/zeros-and-nines.png"></section>
+
+<section
+data-background-image="figures/zero-nine-line.png"></section>
+
+<section
+data-background-image="figures/zero-nine-hallucination.png"></section>
+
+<section>
+    <div class="read-text">
+        <p>
+            So we've made two functions:
+        </p>
+        <ol>
+            <li>A function which takes a <span class="emph">handwritten number</span> and converts it to a position on the numberline</li>
+            <li>And a function which takes a <span class="emph">real number</span> and generates a "handwritten number" which would go there on the numberilne</li>
+        </ol>
+    </div>
+</section>
+
+<section>
+    <p>You can generalize this to multiple dimensions!</p>
+</section>
+
+<section
+data-background-image="figures/multi-dimensional.png"></section>
+
+<section data-auto-animate="">
+    <div class="read-text">
+        <p>For cryoEM, you can use this to model <span class="emph">continuous heterogeneity</span></p>
+        <p class="fragment">
+            Let's make a function that takes a particle image \(I\), with a given pose \(\phi_i\) which we've
+            already found, and puts it into one of these latent spaces
+        </p>
+    </div>
+    <p class="bigmath fragment" style="padding: 0; margin: 0;">
+        \[
+        z_i = E(I_i, \phi_i)
+        \]
+    </p>
+    <div class="read-text fragment">
+        <p>And a function which takes these coordinates and gives us a volume</p>
+    </div>
+    <p class="bigmath fragment" style="padding: 0; margin: 0;">
+        \[V_z = D(z)\]
+    </p>
+</section>
+
+<section data-auto-animate="">
+    <p class="bigmath" style="padding: 0; margin: 0;">
+        \[
+        z_i = E(I_i, \phi_i)
+        \]
+    </p>
+    <p class="bigmath" style="padding: 0; margin: 0;">
+        \[V_z = D(z)\]
+    </p>
+
+    <p>
+        Note that we don't use a consensus volume here anymore (although that's how we got
+        \(\phi\) to begin with)
+    </p>
+    <p class="fragment">
+        We instead get the volume by <span class="emph">decoding</span> our coordinates.
+    </p>
+</section>
+
+<section>
+    <p>This is (basically) cryoDRGN</p>
+    <div class="fit-one r-stretch">
+        <img src="figures/cryoDRGN.webp" alt="" class="bordered">
+    </div>
+</section>
+
+<section data-auto-animate="">
+    <h2>So let's review:</h2>
+    <p class="bigmath">
+        \[
+        I_i \stackrel{?}{=} V
+        \]
+    </p>
+</section>
+<section data-auto-animate="">
+    <h2>So let's review:</h2>
+    <p class="bigmath">
+        \[
+        I_i = P(\phi_i)V
+        \]
+    </p>
+</section>
+<section data-auto-animate="">
+    <h2>So let's review:</h2>
+    <p class="bigmath">
+        \[
+        I_i = C_iP(\phi_i)V
+        \]
+    </p>
+</section>
+<section data-auto-animate="">
+    <h2>So let's review:</h2>
+    <p class="bigmath">
+        \[
+        I_i = C_iP(\phi_i)V + \eta
+        \]
+    </p>
+</section>
+<section data-auto-animate="">
+    <h2>So let's review:</h2>
+    <p class="bigmath">
+        \[
+        I_i = C_iP(\phi_i)V + \eta
+        \]
+    </p>
+    <p class="bigmath">
+        \[
+        z_i = E(I_i, \phi_i); V_z = D(z)
+        \]
+    </p>
+</section>
+
+<section
+data-background-image="figures/enac-latent-space.png"></section>
+
+<section data-auto-animate>
+    <h2>But cryoSPARC uses this to model <span class="emph">deformation</span></h2>
+</section>
+<section data-auto-animate>
+    <h2>But cryoSPARC uses this to model <span class="emph">deformation</span></h2>
+    <p>
+        Instead of encoding different volumes, cryoSPARC encodes the <span class="emph">deformation</span>
+        needed to make a particle match the consensus volume.
+    </p>
+    <p class="fragment">
+        In other words, how you need to move electron density around to get it into the "right" place.
+    </p>
+    <p class="fragment">
+        cryoSPARC also doesn't quite use the encoder/decoder approach I mentioned earlier, but the basic idea is the same.
+    </p>
+</section>
+
+<section>
+    <div class="fit-one r-stretch">
+        <img src="figures/deformation-convection.jpeg" alt="" class="bordered">
+    </div>
+</section>
+
+<section data-auto-animate="">
+    <p>So now, our images are modeled like this:</p>
+    
+    <p class="bigmath">
+        \[
+        I_i = C_iP(\phi_i)W_i + \eta
+        \]
+    </p>
+
+    <p>where \(W_i\) is some deformed version of our volume, \(V\)</p>
+
+    <p class="fragment">We just need a way to figure out what deformed volume \(W_i\) goes with each image \(I_i\).</p>
+</section>
+
+<section>
+    <div class="read-text">
+        <p>To do that, we first get our consensus volume \(V\).</p>
+        <p class="fragment">Next, we <span class="emph">train</span> our <span class="emph">encoder</span>.</p>
+        <p class="fragment">For each image \(I_i\) with pose \(\phi_i\), we estimate some coordinate \(z_i\) in our deformational latent space.</p>
+        <p class="fragment">
+            This coordinate \(z_i\) produces the volume that would
+            result from applying the deformations for particle \(i\) to the consensus volume \(V\).
+        </p>
+    </div>
+</section>
+
+<section data-auto-animate="">
+    <p>The training process produces a set of parameters \(\Theta\) &mdash; essentially, these parameters define the latent space.</p>
+    <p>
+        So now our image model looks like this:
+    </p>
+    <p class="bigmath">
+        \[
+        I_i = C_iP(\phi_i)D(f_\Theta(z_i), V) + \eta
+        \]
+    </p>
+</section>
+<section data-auto-animate="">
+    <p>The training process produces a set of parameters \(\Theta\) &mdash; essentially, these parameters define the latent space.</p>
+    <p>
+        So now our image model looks like this:
+    </p>
+    <p class="bigmath">
+        \[
+        I_i = C_iP(\phi_i)D(f_\Theta(z_i), V) + \eta
+        \]
+    </p>
+    <div class="fit-one r-stretch">
+        <img src="figures/math-overview.jpg" alt="" class="bordered">
+    </div>
+</section>
+
+<section data-auto-animate="">
+    <p class="bigmath">
+        \[
+        I_i = C_iP(\phi_i)D(f_\Theta(z_i), V) + \eta
+        \]
+    </p>
+    <p>The <span class="emph">actual math</span> here is more complicated and less interesting.</p>
+    <p>It's best to just think of these "operators".</p>
+</section>
+
+<section data-auto-animate="">
+    <h2>Math Highlights</h2>
+
+    <p>We use all the particles to find \(\Theta\). That means 3D Flex is <span class="emph">not gold standard!</span></p>
+</section>
+<section data-auto-animate="">
+    <h2>Math Highlights</h2>
+
+    <p>
+        We don't actually estimate \(z_i\), but instead the posterior distribution \(p(z_i)\).
+    </p> 
+    <p>We do this because it's impossible
+        to get \(z_i\) exactly right, but it also has the added benefit of making nearby values for \(z\) produce similar deformations.
+    </p>
+</section>
+<section data-auto-animate="">
+    <h2>Math Highlights</h2>
+
+    <p>A gaussian prior is applied to the latent coordinates \(z_i\) to keep them centered.</p>
+    <p>This is an important parameter when you're actually doing 3D Flex!</p>
+</section>
+<section data-auto-animate="">
+    <h2>Math Highlights</h2>
+
+    <p>Rather than modeling movement of density between voxels, we just change the coordinates of the whole map</p>
+</section>
+<section data-auto-animate="">
+    <h2>Math Highlights</h2>
+
+    <p>We can alternate training of \(\Theta\) and \(V\)</p>
+    <p>This lets us update our best estimate of \(V\) using what we have learned from flexibility analysis.</p>
+</section>
+
+
+<section>
+    <h2>OK, but how do we actually figure out \(\Theta\)?</h2>
+</section>
+
+<section>
+    <div class="read-text">
+        <p style="font-style: italic;">
+            "It is unlikely that natural deformations would involve large discontinuities in
+            regions of high density; e.g. an &alpha;-helix should not be sheared into disjoint pieces."
+        </p>
+        <p class="fragment" style="font-style: italic;">
+            "It is also unlikely that deformations will be highly non-rigid at fine scales in regions of
+            high density; at the extreme, bond lengths should not stretch or compress substantially."
+        </p>
+    </div>
+</section>
+
+<section
+data-background-image="figures/cat-mesh.png">
+    <div class="r-stretch"></div>
+    <p>First, generate a mesh of tetrahedrons across the volume</p>
+</section>
+<section
+data-background-image="figures/cat-flow.png">
+    <div class="r-stretch"></div>
+    <p>At each point, estimate the local flow</p>
+
+</section>
+<section
+data-background-image="figures/cat-distorted.png">
+    <div class="r-stretch"></div>
+    <p>Use this flow information to deform the tetrahedra</p>
+    <div class="fragment overlay v-flex">
+        <h2 style="margin: auto;">This is inspired by<br>Finite Element Analysis</h2>
+    </div>
+</section>
+
+<section>
+    <div class="read-text">
+        <p>We can also watch for overfitting by re-optimizing \(V\) from half-sets, holding \({z_i}\) and \(\Theta\) constant.</p>
+    </div>
+</section>
+
+<section data-auto-animate="">
+    <h2>Spliceosome</h2>
+    <div class="fit-one r-stretch">
+        <img src="figures/spliceosome.jpg" alt="" class="bordered">
+    </div>
+</section>
+<section data-auto-animate="">
+    <h2>Spliceosome</h2>
+    <div class="fit-one r-stretch">
+        <img src="figures/spliceosome-2.jpg" alt="" class="bordered">
+    </div>
+</section>
+<section data-auto-animate="">
+    <h2>Spliceosome</h2>
+    <div class="fit-one r-stretch">
+        <img src="figures/res-improvement.jpg" alt="" class="bordered">
+    </div>
+</section>
+<section data-auto-animate="">
+    <h2>TRPV1</h2>
+    <div class="fit-one r-stretch">
+        <img src="figures/res-improvement-trpv1.jpg" alt="" class="bordered">
+    </div>
+</section>
+
+</div>
+</div>
+
+
+    <script src="dist/reveal.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.0/styles/tokyo-night-dark.min.css">
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/math/math.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script>
+
+        Reveal.initialize({
+            center: true,
+            hash: true,
+            controls: false,
+            transitionSpeed: 'fast',
+            slideNumber: 'c/t',
+            width: 1200,
+            plugins: [ RevealHighlight, RevealMath.KaTeX ]
+        });
+
+        // fill in ENaC spans
+
+        document.querySelectorAll('span.alpha').forEach(s => {
+            s.innerHTML = '&alpha;';
+        });
+        document.querySelectorAll('span.beta').forEach(s => {
+            s.innerHTML = '&beta;';
+        });
+        document.querySelectorAll('span.gamma').forEach(s => {
+            s.innerHTML = '&gamma;';
+        });
+        document.querySelectorAll('span.cko').forEach(s => {
+            s.innerHTML = 'CKO';
+        })
+        document.querySelectorAll('span.ckodeg').forEach(s => {
+            s.innerHTML = 'CKO/DEG';
+        })
+        document.querySelectorAll('span.asic').forEach(s => {
+            s.innerHTML = 'ASIC';
+        })
+
+        // Reveal.on('fragmentshown', event => {
+        //     switch (event.fragment.id) {
+        //         case 'play-zoom':
+        //             zoomMovie.play();
+        //             break;
+        //     }
+        // })
+
+        // Reveal.on('fragmenthidden', event => {
+        //     switch (event.fragment.id) {
+        //         case 'play-zoom':
+        //             zoomMovie.pause();
+        //             zoomMovie.currentTime = 0;
+        //             break;
+        //     }
+        // })
+
+
+    </script>
+  </body>
+</html>
